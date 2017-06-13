@@ -1,0 +1,29 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tokenizer", "Tokenizer\Tokenizer.csproj", "{C54BCA00-9967-47BF-84B2-F43627C560E0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tokenizer.Tests", "Tokenizer.Tests\Tokenizer.Tests.csproj", "{451C2752-F956-42A8-A26C-C3C760ECA44A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tokenizer.Demo", "Tokenizer.Demo\Tokenizer.Demo.csproj", "{2DF6969F-F955-48B5-A536-A66C8CD36CAF}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C54BCA00-9967-47BF-84B2-F43627C560E0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C54BCA00-9967-47BF-84B2-F43627C560E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C54BCA00-9967-47BF-84B2-F43627C560E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C54BCA00-9967-47BF-84B2-F43627C560E0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{451C2752-F956-42A8-A26C-C3C760ECA44A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{451C2752-F956-42A8-A26C-C3C760ECA44A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{451C2752-F956-42A8-A26C-C3C760ECA44A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{451C2752-F956-42A8-A26C-C3C760ECA44A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2DF6969F-F955-48B5-A536-A66C8CD36CAF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2DF6969F-F955-48B5-A536-A66C8CD36CAF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2DF6969F-F955-48B5-A536-A66C8CD36CAF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2DF6969F-F955-48B5-A536-A66C8CD36CAF}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
