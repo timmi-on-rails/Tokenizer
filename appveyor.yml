@@ -2,7 +2,7 @@ version: 1.0.{build}
 configuration: Release
 platform: Any CPU
 before_build:
-- ps: nuget restore
+- ps: cd Tokenizer && nuget restore
 build:
   publish_nuget: true
   verbosity: minimal
