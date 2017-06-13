@@ -8,5 +8,4 @@ build:
   verbosity: minimal
 artifacts:
 - path: Tokenizer\Tokenizer.Demo\bin\Release
-  name: Demo
-
+  name: TokenizerDemo
