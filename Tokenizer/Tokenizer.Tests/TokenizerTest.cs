@@ -142,41 +142,38 @@ namespace ExpressionTest
 
 		void AssertTokensMatch(string expression, params Token[] expectedTokens)
 		{
-			using (StringReader stringReader = new StringReader(expression))
+			IEnumerable<Token> actualTokens = Tokenize.FromString(expression);
+
+			IEnumerator<Token> actualEnumerator = actualTokens.GetEnumerator();
+			IEnumerator<Token> expectedEnumerator = ((IEnumerable<Token>)expectedTokens).GetEnumerator();
+
+			bool actualHasNext, expectedHasNext;
+
+			while ((actualHasNext = actualEnumerator.MoveNext()) & (expectedHasNext = expectedEnumerator.MoveNext()))
 			{
-				IEnumerable<Token> actualTokens = Tokenize.FromTextReader(stringReader);
+				Token actualToken = actualEnumerator.Current;
+				Token expectedToken = expectedEnumerator.Current;
 
-				IEnumerator<Token> actualEnumerator = actualTokens.GetEnumerator();
-				IEnumerator<Token> expectedEnumerator = ((IEnumerable<Token>)expectedTokens).GetEnumerator();
+				bool tokensMatch = actualToken.TokenType == expectedToken.TokenType
+								   && String.Equals(actualToken.Content, expectedToken.Content, StringComparison.Ordinal)
+								   && actualToken.Position == expectedToken.Position;
 
-				bool actualHasNext, expectedHasNext;
-
-				while ((actualHasNext = actualEnumerator.MoveNext()) & (expectedHasNext = expectedEnumerator.MoveNext()))
+				if (!tokensMatch)
 				{
-					Token actualToken = actualEnumerator.Current;
-					Token expectedToken = expectedEnumerator.Current;
-
-					bool tokensMatch = actualToken.TokenType == expectedToken.TokenType
-									   && String.Equals(actualToken.Content, expectedToken.Content, StringComparison.Ordinal)
-									   && actualToken.Position == expectedToken.Position;
-
-					if (!tokensMatch)
-					{
-						string message = "expected token: {0},{1},{2} - got token: {3},{4},{5} in \"{6}\"";
-						Assert.Fail(String.Format(message, expectedToken.TokenType, expectedToken.Content, expectedToken.Position,
-												  actualToken.TokenType, actualToken.Content, actualToken.Position, expression));
-					}
+					string message = "expected token: {0},{1},{2} - got token: {3},{4},{5} in \"{6}\"";
+					Assert.Fail(String.Format(message, expectedToken.TokenType, expectedToken.Content, expectedToken.Position,
+											  actualToken.TokenType, actualToken.Content, actualToken.Position, expression));
 				}
+			}
 
-				if (actualHasNext)
-				{
-					Assert.Fail("Did not expect token: " + actualEnumerator.Current.TokenType);
-				}
+			if (actualHasNext)
+			{
+				Assert.Fail("Did not expect token: " + actualEnumerator.Current.TokenType);
+			}
 
-				if (expectedHasNext)
-				{
-					Assert.Fail("Missing expected token: " + expectedEnumerator.Current.TokenType);
-				}
+			if (expectedHasNext)
+			{
+				Assert.Fail("Missing expected token: " + expectedEnumerator.Current.TokenType);
 			}
 		}
 	}
