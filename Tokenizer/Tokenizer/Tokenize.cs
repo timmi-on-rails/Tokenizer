@@ -9,53 +9,112 @@ namespace Tokenizer
 	{
 		public static IEnumerable<Token> FromFile(string fileName)
 		{
-			using (TextReader stringReader = File.OpenText(fileName))
-			{
-				foreach (Token token in FromTextReader(stringReader))
-				{
-					yield return token;
-				}
-			}
+			return new TokenEnumerableFromFile(fileName);
 		}
 
 		public static IEnumerable<Token> FromString(string content)
 		{
-			using (StringReader stringReader = new StringReader(content))
-			{
-				foreach (Token token in FromTextReader(stringReader))
-				{
-					yield return token;
-				}
-			}
+			return new TokenEnumerableFromString(content);
 		}
 
 		public static IEnumerable<Token> FromTextReader(TextReader textReader)
 		{
-			return new TokenEnumerable(textReader);
+			return new TokenEnumerableFromTextReader(textReader);
 		}
 
-		class TokenEnumerable : IEnumerable<Token>
+		class TokenEnumerableFromFile : IEnumerable<Token>
+		{
+			readonly string fileName;
+			bool alreadyIterated;
+
+			public TokenEnumerableFromFile(string fileName)
+			{
+				this.fileName = fileName;
+			}
+
+			public IEnumerator<Token> GetEnumerator()
+			{
+				if (alreadyIterated)
+				{
+					throw new InvalidOperationException("It is not allowed to iterate more than once.");
+				}
+
+				alreadyIterated = true;
+
+				using (TextReader textReader = File.OpenText(fileName))
+				{
+					TextReaderTokenizer tokenizer = new TextReaderTokenizer(textReader);
+
+					foreach (Token token in tokenizer.Scan())
+					{
+						yield return token;
+					}
+				}
+			}
+
+			IEnumerator IEnumerable.GetEnumerator()
+			{
+				return GetEnumerator();
+			}
+		}
+
+		class TokenEnumerableFromString : IEnumerable<Token>
+		{
+			readonly string content;
+			bool alreadyIterated;
+
+			public TokenEnumerableFromString(string content)
+			{
+				this.content = content;
+			}
+
+			public IEnumerator<Token> GetEnumerator()
+			{
+				if (alreadyIterated)
+				{
+					throw new InvalidOperationException("It is not allowed to iterate more than once.");
+				}
+
+				alreadyIterated = true;
+
+				using (TextReader textReader = new StringReader(content))
+				{
+					TextReaderTokenizer tokenizer = new TextReaderTokenizer(textReader);
+
+					foreach (Token token in tokenizer.Scan())
+					{
+						yield return token;
+					}
+				}
+			}
+
+			IEnumerator IEnumerable.GetEnumerator()
+			{
+				return GetEnumerator();
+			}
+		}
+
+		class TokenEnumerableFromTextReader : IEnumerable<Token>
 		{
 			readonly TextReader textReader;
-			bool used;
+			bool alreadyIterated;
 
-			public TokenEnumerable(TextReader textReader)
+			public TokenEnumerableFromTextReader(TextReader textReader)
 			{
 				this.textReader = textReader;
 			}
 
 			public IEnumerator<Token> GetEnumerator()
 			{
-				if (used)
-					throw new InvalidOperationException();
-
-				used = true;
-				TextReaderTokenizer tokenizer = new TextReaderTokenizer(textReader);
-
-				foreach (Token token in tokenizer.Scan())
+				if (alreadyIterated)
 				{
-					yield return token;
+					throw new InvalidOperationException("It is not allowed to iterate more than once.");
 				}
+
+				alreadyIterated = true;
+
+				TextReaderTokenizer tokenizer = new TextReaderTokenizer(textReader);
+				return tokenizer.Scan().GetEnumerator();
 			}
 
 			IEnumerator IEnumerable.GetEnumerator()
