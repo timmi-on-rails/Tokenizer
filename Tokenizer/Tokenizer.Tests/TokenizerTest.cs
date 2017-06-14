@@ -32,8 +32,6 @@ namespace ExpressionTest
 			AssertTokensMatch(",", Token(TokenType.Comma, ",", 0), Token(TokenType.EndOfFile, "", 1));
 			AssertTokensMatch("<=", Token(TokenType.LessOrEqual, "<=", 0), Token(TokenType.EndOfFile, "", 2));
 			AssertTokensMatch(">=", Token(TokenType.GreaterOrEqual, ">=", 0), Token(TokenType.EndOfFile, "", 2));
-			AssertTokensMatch("true", Token(TokenType.True, "true", 0), Token(TokenType.EndOfFile, "", 4));
-			AssertTokensMatch("false", Token(TokenType.False, "false", 0), Token(TokenType.EndOfFile, "", 5));
 			AssertTokensMatch("365", Token(TokenType.Integer, "365", 0), Token(TokenType.EndOfFile, "", 3));
 			AssertTokensMatch("x", Token(TokenType.Identifier, "x", 0), Token(TokenType.EndOfFile, "", 1));
 			AssertTokensMatch("!", Token(TokenType.Exclamation, "!", 0), Token(TokenType.EndOfFile, "", 1));

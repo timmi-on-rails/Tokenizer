@@ -8,12 +8,6 @@ namespace Tokenizer
 {
 	class TextReaderTokenizer
 	{
-		static readonly Dictionary<string, TokenType> _keywords = new Dictionary<string, TokenType>
-		{
-			{ "true", TokenType.True },
-			{ "false", TokenType.False }
-		};
-
 		readonly StringBuilder tokenContentBuilder = new StringBuilder();
 		readonly TextReader textReader;
 		int index;
@@ -171,12 +165,6 @@ namespace Tokenizer
 			if (!PeekIsEOF() && !PeekIsNewLine() && !PeekIsWhiteSpace() && !PeekIsPunctuation())
 			{
 				return ScanWord();
-			}
-
-			TokenType keywordTokenType;
-			if (_keywords.TryGetValue(tokenContentBuilder.ToString(), out keywordTokenType))
-			{
-				return CreateToken(keywordTokenType);
 			}
 
 			return CreateToken(TokenType.Identifier);

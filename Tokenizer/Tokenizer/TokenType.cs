@@ -33,8 +33,6 @@
 		LessOrEqual,
 		GreaterOrEqual,
 		WhiteSpace,
-		True,
-		False,
 		Percent,
 		Exclamation,
 		NewLine,
