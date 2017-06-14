@@ -172,12 +172,10 @@ namespace Tokenizer
 
 		Token ScanString()
 		{
-			Consume();
-
-			while (peek != '"' && !PeekIsNewLine())
+			do
 			{
 				Consume();
-			}
+			} while (peek != '"' && !PeekIsNewLine());
 
 			if (peek == '"')
 			{
@@ -190,10 +188,10 @@ namespace Tokenizer
 
 		Token ScanInteger()
 		{
-			while (PeekIsDigit())
+			do
 			{
 				Consume();
-			}
+			} while (PeekIsDigit());
 
 			if (peek == '.' || peek == 'e')
 			{
@@ -375,10 +373,10 @@ namespace Tokenizer
 
 		Token ScanWhiteSpace()
 		{
-			while (PeekIsWhiteSpace())
+			do
 			{
 				Consume();
-			}
+			} while (PeekIsWhiteSpace());
 
 			return CreateToken(TokenType.WhiteSpace);
 		}

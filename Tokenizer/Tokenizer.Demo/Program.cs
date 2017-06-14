@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Tokenizer;
 
 namespace FileTokenizer
@@ -11,6 +13,12 @@ namespace FileTokenizer
 			if (args.Length == 0 || string.IsNullOrWhiteSpace(args[0]))
 			{
 				Console.WriteLine("usage: TokenizeFile <file name>");
+				return;
+			}
+
+			if (args.Length == 2 && args[0] == "-d")
+			{
+				TokenizeDirectory(args[1]);
 				return;
 			}
 
@@ -31,6 +39,25 @@ namespace FileTokenizer
 
 				Console.WriteLine("{0,7} {1,-17} {2}", token.Position, token.TokenType, escapedContent);
 			}
+		}
+
+		static void TokenizeDirectory(string directory)
+		{
+			int unknownTokens = 0;
+			string[] files = Directory.GetFiles(directory, "*.cs", SearchOption.AllDirectories);
+
+			foreach (string fileName in files)
+			{
+				List<Token> tokens = Tokenize.FromFile(fileName).Where(token => token.TokenType == TokenType.Unknown).ToList();
+				unknownTokens += tokens.Count;
+
+				if (tokens.Count > 0)
+				{
+					Console.WriteLine(string.Join(",", tokens.Take(5).Select(token => token.Content)));
+				}
+			}
+
+			Console.WriteLine("Found {0} unknown tokens in {1} files.", unknownTokens, files.Length);
 		}
 	}
 }
