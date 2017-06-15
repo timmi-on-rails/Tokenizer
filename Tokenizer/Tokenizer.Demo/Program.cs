@@ -48,12 +48,15 @@ namespace FileTokenizer
 
 			foreach (string fileName in files)
 			{
-				List<Token> tokens = Tokenize.FromFile(fileName).Where(token => token.TokenType == TokenType.Unknown).ToList();
+				List<Token> tokens = Tokenize.FromFile(fileName).Where(token => token.TokenType == TokenType.SingleLineComment).ToList();
 				unknownTokens += tokens.Count;
 
 				if (tokens.Count > 0)
 				{
-					Console.WriteLine(string.Join(",", tokens.Take(5).Select(token => token.Content)));
+					Console.ForegroundColor = ConsoleColor.DarkMagenta;
+					Console.WriteLine("\n" + fileName + ":");
+					Console.ResetColor();
+					Console.WriteLine(string.Join("\n", tokens.Select(token => token.Content)));
 				}
 			}
 

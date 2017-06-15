@@ -70,11 +70,11 @@ namespace ExpressionTest
 		public void TestSomeOperators()
 		{
 			AssertTokensMatch("1+  y",
-				Token(TokenType.Integer, "1", 0),
-				Token(TokenType.Plus, "+", 1),
-				Token(TokenType.WhiteSpace, "  ", 2),
-				Token(TokenType.Identifier, "y", 4),
-				Token(TokenType.EndOfFile, "", 5));
+							Token(TokenType.Integer, "1", 0),
+							Token(TokenType.Plus, "+", 1),
+							Token(TokenType.WhiteSpace, "  ", 2),
+							Token(TokenType.Identifier, "y", 4),
+							Token(TokenType.EndOfFile, "", 5));
 
 			AssertTokensMatch("1<=2",
 				Token(TokenType.Integer, "1", 0),

@@ -2,6 +2,10 @@
 {
 	public class Token
 	{
+		// public Object Value { get; }
+
+		// public ErrorCode ErrorCode { get; }
+
 		public TokenType TokenType { get; }
 
 		public string Content { get; }

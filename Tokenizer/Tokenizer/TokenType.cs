@@ -2,6 +2,7 @@
 {
 	public enum TokenType
 	{
+		Tilde,
 		Assignment,
 		Equal,
 		SingleLineComment,
@@ -33,6 +34,7 @@
 		LessOrEqual,
 		GreaterOrEqual,
 		WhiteSpace,
+		Character,
 		Percent,
 		Exclamation,
 		NewLine,
@@ -40,6 +42,7 @@
 		AndDouble,
 		AndSingle,
 		PipeSingle,
-		PipeDouble
+		PipeDouble,
+		Directive
 	}
 }
