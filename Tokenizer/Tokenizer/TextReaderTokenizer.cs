@@ -166,6 +166,9 @@ namespace Tokenizer
 				return ScanWord();
 			}
 
+			Consume();
+			Consume();
+
 			return CreateToken(TokenType.MultiLineComment);
 		}
 
