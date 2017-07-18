@@ -5,8 +5,6 @@
 		Tilde,
 		Assignment,
 		Equal,
-		SingleLineComment,
-		MultiLineComment,
 		NotEqual,
 		LeftParenthesis,
 		RightParenthesis,
@@ -34,15 +32,11 @@
 		LessOrEqual,
 		GreaterOrEqual,
 		WhiteSpace,
-		Character,
 		Percent,
 		Exclamation,
-		NewLine,
-		String,
 		AndDouble,
 		AndSingle,
 		PipeSingle,
-		PipeDouble,
-		Directive
+		PipeDouble
 	}
 }

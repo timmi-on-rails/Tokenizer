@@ -12,7 +12,6 @@ namespace Tokenizer
 		readonly TextReader textReader;
 		int index;
 		int peek;
-		int peek_1;
 
 		public TextReaderTokenizer(TextReader textReader)
 		{
@@ -26,15 +25,14 @@ namespace Tokenizer
 			tokenContentBuilder.Append((char)peek);
 			index++;
 			peek = textReader.Read();
-			peek_1 = textReader.Peek();
 		}
 
-		Token CreateToken(TokenType tokenType)
+		Token CreateToken(TokenType tokenType, ErrorCode errorCode = ErrorCode.Ok)
 		{
 			string content = tokenContentBuilder.ToString();
 			tokenContentBuilder.Clear();
 			int startPosition = index - content.Length;
-			return new Token(tokenType, content, startPosition);
+			return new Token(tokenType, content, startPosition, errorCode);
 		}
 
 		bool PeekIsPunctuation()
@@ -54,11 +52,6 @@ namespace Tokenizer
 				peek == '|' || peek == '~';
 		}
 
-		bool PeekIsNewLine()
-		{
-			return peek == '\n' || (peek == '\r' && peek_1 == '\n');
-		}
-
 		bool PeekIsDigit()
 		{
 			return '0' <= peek && peek <= '9';
@@ -66,7 +59,7 @@ namespace Tokenizer
 
 		bool PeekIsLetter()
 		{
-			return ('a' <= peek && peek <= 'z') || ('A' <= peek && peek <= 'Z') || peek == 'ß';
+			return ('a' <= peek && peek <= 'z') || ('A' <= peek && peek <= 'Z');
 		}
 
 		bool PeekIsWhiteSpace()
@@ -79,10 +72,14 @@ namespace Tokenizer
 			return peek == -1;
 		}
 
+		bool PeekIsWordSeparator()
+		{
+			return PeekIsWhiteSpace() || PeekIsPunctuation() || PeekIsEOF();
+		}
+
 		public IEnumerable<Token> Scan()
 		{
 			peek = textReader.Read();
-			peek_1 = textReader.Peek();
 
 			while (peek != -1)
 			{
@@ -102,84 +99,17 @@ namespace Tokenizer
 				{
 					yield return ScanPunctuation();
 				}
-				else if (peek == '@')
-				{
-					Consume();
-					if (peek == '"')
-					{
-						yield return ScanVerbatimString();
-					}
-					else if (PeekIsLetter() || peek == '_')
-					{
-						yield return ScanIdentifier();
-					}
-					else
-					{
-						yield return ScanWord();
-					}
-				}
-				else if (peek == '\n')
-				{
-					Consume();
-					yield return CreateToken(TokenType.NewLine);
-				}
-				else if (peek == '\r' && peek_1 == '\n')
-				{
-					Consume();
-					Consume();
-					yield return CreateToken(TokenType.NewLine);
-				}
 				else if (PeekIsDigit())
 				{
 					yield return ScanInteger();
 				}
-				else if (peek == '\'')
-				{
-					yield return ScanCharacter();
-				}
-				else if (peek == '"')
-				{
-					yield return ScanString();
-				}
-				else if (peek == '#')
-				{
-					yield return ScanDirective();
-				}
 				else
 				{
-					yield return ScanWord();
+					yield return ScanWord(ErrorCode.Unknown);
 				}
 			}
 
 			yield return CreateToken(TokenType.EndOfFile);
-		}
-
-		Token ScanMultiLineComment()
-		{
-			do
-			{
-				Consume();
-			} while (!(peek == '*' && peek_1 == '/') && !PeekIsEOF());
-
-			if (PeekIsEOF())
-			{
-				return ScanWord();
-			}
-
-			Consume();
-			Consume();
-
-			return CreateToken(TokenType.MultiLineComment);
-		}
-
-		Token ScanSingleLineComment()
-		{
-			do
-			{
-				Consume();
-			} while (!PeekIsNewLine() && !PeekIsEOF());
-
-			return CreateToken(TokenType.SingleLineComment);
 		}
 
 		Token ScanIdentifier()
@@ -189,84 +119,12 @@ namespace Tokenizer
 				Consume();
 			} while (PeekIsLetter() || PeekIsDigit() || peek == '_');
 
-			if (!PeekIsEOF() && !PeekIsNewLine() && !PeekIsWhiteSpace() && !PeekIsPunctuation())
+			if (!PeekIsWordSeparator())
 			{
-				return ScanWord();
+				return ScanWord(ErrorCode.NotAllowedIdentifierCharacters);
 			}
 
 			return CreateToken(TokenType.Identifier);
-		}
-
-		Token ScanCharacter()
-		{
-			// TODO escape chars
-			do
-			{
-				Consume();
-			} while (peek != '\'' && !PeekIsNewLine() && !PeekIsEOF());
-
-			if (peek == '\'')
-			{
-				Consume();
-				return CreateToken(TokenType.Character);
-			}
-
-			return ScanWord();
-		}
-
-		Token ScanString()
-		{
-			// TODO escape chars 
-			do
-			{
-				Consume();
-
-				if (peek == '\\' && peek_1 == '\\')
-				{
-					Consume();
-					Consume();
-				}
-
-				if (peek == '\\' && peek_1 == '\"')
-				{
-					Consume();
-					Consume();
-				}
-			} while (peek != '"' && !PeekIsNewLine() && !PeekIsEOF());
-
-			if (peek == '"')
-			{
-				Consume();
-				return CreateToken(TokenType.String);
-			}
-
-			return ScanWord();
-		}
-
-		Token ScanVerbatimString()
-		{
-			do
-			{
-				Consume();
-			} while (peek != '"' && !PeekIsNewLine() && !PeekIsEOF());
-
-			if (peek == '"')
-			{
-				Consume();
-				return CreateToken(TokenType.String);
-			}
-
-			return ScanWord();
-		}
-
-		Token ScanDirective()
-		{
-			do
-			{
-				Consume();
-			} while (PeekIsLetter());
-
-			return CreateToken(TokenType.Directive);
 		}
 
 		Token ScanInteger()
@@ -310,7 +168,7 @@ namespace Tokenizer
 						return CreateToken(TokenType.Dot);
 					}
 
-					return ScanWord();
+					return ScanWord(ErrorCode.ExpectedDecimal);
 				}
 			}
 
@@ -396,14 +254,6 @@ namespace Tokenizer
 					return CreateToken(TokenType.Star);
 				case '/':
 					Consume();
-					if (peek == '*')
-					{
-						return ScanMultiLineComment();
-					}
-					else if (peek == '/')
-					{
-						return ScanSingleLineComment();
-					}
 					return CreateToken(TokenType.Slash);
 				case '%':
 					Consume();
@@ -422,7 +272,6 @@ namespace Tokenizer
 					return CreateToken(TokenType.Semicolon);
 				case '.':
 					Consume();
-					Console.WriteLine("sadddsa");
 					return CreateToken(TokenType.Dot);
 				case '{':
 					Consume();
@@ -467,14 +316,14 @@ namespace Tokenizer
 			return CreateToken(TokenType.WhiteSpace);
 		}
 
-		Token ScanWord()
+		Token ScanWord(ErrorCode errorCode)
 		{
-			while (!PeekIsEOF() && !PeekIsNewLine() && !PeekIsWhiteSpace() && !PeekIsPunctuation())
+			while (!PeekIsWordSeparator())
 			{
 				Consume();
 			}
 
-			return CreateToken(TokenType.Unknown);
+			return CreateToken(TokenType.Unknown, errorCode);
 		}
 	}
 }

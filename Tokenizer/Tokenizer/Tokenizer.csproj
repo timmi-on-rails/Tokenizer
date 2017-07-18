@@ -35,6 +35,7 @@
     <Compile Include="Token.cs" />
     <Compile Include="TextReaderTokenizer.cs" />
     <Compile Include="TokenType.cs" />
+    <Compile Include="ErrorCode.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

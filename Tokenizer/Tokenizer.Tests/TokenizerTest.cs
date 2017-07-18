@@ -1,9 +1,8 @@
 ﻿using System;
-using System.Linq;
 using System.Collections.Generic;
-using System.IO;
-using Tokenizer;
+using System.Linq;
 using NUnit.Framework;
+using Tokenizer;
 
 namespace ExpressionTest
 {
@@ -45,9 +44,9 @@ namespace ExpressionTest
 			AssertTokensMatch("23123", Token(TokenType.Integer, "23123", 0), Token(TokenType.EndOfFile, "", 5));
 			AssertTokensMatch(".23", Token(TokenType.Decimal, ".23", 0), Token(TokenType.EndOfFile, "", 3));
 			AssertTokensMatch("13.3", Token(TokenType.Decimal, "13.3", 0), Token(TokenType.EndOfFile, "", 4));
-			AssertTokensMatch("27.", Token(TokenType.Unknown, "27.", 0), Token(TokenType.EndOfFile, "", 3));
+			AssertTokensMatch("27.", Token(TokenType.Unknown, "27.", 0, ErrorCode.ExpectedDecimal), Token(TokenType.EndOfFile, "", 3));
 			AssertTokensMatch("1e10", Token(TokenType.Decimal, "1e10", 0), Token(TokenType.EndOfFile, "", 4));
-			AssertTokensMatch("1.e10", Token(TokenType.Unknown, "1.e10", 0), Token(TokenType.EndOfFile, "", 5));
+			AssertTokensMatch("1.e10", Token(TokenType.Unknown, "1.e10", 0, ErrorCode.ExpectedDecimal), Token(TokenType.EndOfFile, "", 5));
 			AssertTokensMatch("1.7e3", Token(TokenType.Decimal, "1.7e3", 0), Token(TokenType.EndOfFile, "", 5));
 			AssertTokensMatch("1.22e+4", Token(TokenType.Decimal, "1.22e+4", 0), Token(TokenType.EndOfFile, "", 7));
 			AssertTokensMatch("1.22e-34", Token(TokenType.Decimal, "1.22e-34", 0), Token(TokenType.EndOfFile, "", 8));
@@ -84,44 +83,11 @@ namespace ExpressionTest
 		}
 
 		[Test]
-		public void TestWhiteSpaceEndOfLine()
-		{
-			AssertTokensMatch("bla  \n",
-				Token(TokenType.Identifier, "bla", 0),
-				Token(TokenType.WhiteSpace, "  ", 3),
-				Token(TokenType.NewLine, "\n", 5),
-				Token(TokenType.EndOfFile, "", 6));
-		}
-
-		[Test]
-		public void TestIdentifierEndOfLine()
-		{
-			AssertTokensMatch("bla\n",
-				Token(TokenType.Identifier, "bla", 0),
-				Token(TokenType.NewLine, "\n", 3),
-				Token(TokenType.EndOfFile, "", 4));
-		}
-
-		[Test]
 		public void TestUnknownToken()
 		{
-			AssertTokensMatch("blühb\nbla",
-				Token(TokenType.Unknown, "blühb", 0),
-				Token(TokenType.NewLine, "\n", 5),
-				Token(TokenType.Identifier, "bla", 6),
-				Token(TokenType.EndOfFile, "", 9));
-		}
-
-		[Test]
-		public void TestTokenizeFromTextReaderOnlyAllowsOneIteration()
-		{
-			using (StringReader stringReader = new StringReader("test"))
-			{
-				IEnumerable<Token> tokens = Tokenize.FromTextReader(stringReader);
-
-				tokens.First();
-				Assert.Throws<InvalidOperationException>(() => tokens.First());
-			}
+			AssertTokensMatch("blühb",
+							  Token(TokenType.Unknown, "blühb", 0, ErrorCode.NotAllowedIdentifierCharacters),
+							  Token(TokenType.EndOfFile, "", 5));
 		}
 
 		[Test]
@@ -133,9 +99,9 @@ namespace ExpressionTest
 			Assert.Throws<InvalidOperationException>(() => tokens.First());
 		}
 
-		Token Token(TokenType tokenType, string value, int position)
+		Token Token(TokenType tokenType, string value, int position, ErrorCode errorCode = ErrorCode.Ok)
 		{
-			return new Token(tokenType, value, position);
+			return new Token(tokenType, value, position, errorCode);
 		}
 
 		void AssertTokensMatch(string expression, params Token[] expectedTokens)
@@ -154,13 +120,14 @@ namespace ExpressionTest
 
 				bool tokensMatch = actualToken.TokenType == expectedToken.TokenType
 								   && String.Equals(actualToken.Content, expectedToken.Content, StringComparison.Ordinal)
-								   && actualToken.Position == expectedToken.Position;
+								   && actualToken.Position == expectedToken.Position
+								   && actualToken.ErrorCode == expectedToken.ErrorCode;
 
 				if (!tokensMatch)
 				{
-					string message = "expected token: {0},{1},{2} - got token: {3},{4},{5} in \"{6}\"";
-					Assert.Fail(String.Format(message, expectedToken.TokenType, expectedToken.Content, expectedToken.Position,
-											  actualToken.TokenType, actualToken.Content, actualToken.Position, expression));
+					string message = "expected token: {0},{1},{2},{3} - got token: {4},{5},{6},{7} in \"{8}\"";
+					Assert.Fail(String.Format(message, expectedToken.TokenType, expectedToken.Content, expectedToken.Position, expectedToken.ErrorCode,
+											  actualToken.TokenType, actualToken.Content, actualToken.Position, actualToken.ErrorCode, expression));
 				}
 			}
 
